@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EasyTrack</title>
-  <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="app">
 
-  <h1>EasyTrack</h1>
-  <p>Kliks: <span id="count">0</span></p>
+    <header>
+      <h1>EasyTrack</h1>
+      <div class="actions">
+        <button id="addTabBtn">➕ Tab</button>
+        <button id="settingsBtn">⚙️</button>
+      </div>
+    </header>
 
-  <button onclick="klik()">Klik mij</button>
-  <button onclick="reset()">Reset</button>
-  <button onclick="vraagToestemming()">Meldingen aanzetten</button>
+    <main id="content"></main>
+
+  </div>
 
   <script src="script.js"></script>
 </body>

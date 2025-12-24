@@ -1,18 +1,42 @@
+:root {
+  --bg: #ffffff;
+  --text: #111;
+  --card: #f2f2f2;
+}
+
+body.dark {
+  --bg: #111;
+  --text: #fff;
+  --card: #1e1e1e;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: white;
-  text-align: center;
-  padding-top: 50px;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 button {
-  padding: 15px 30px;
-  font-size: 18px;
-  border: none;
+  padding: 6px 10px;
+  font-size: 16px;
+}
+
+.day {
+  background: var(--card);
+  margin: 10px;
+  padding: 10px;
   border-radius: 10px;
-  background: limegreen;
-  color: black;
-  cursor: pointer;
-  margin: 5px;
+}
+
+.entry {
+  font-size: 14px;
+  margin-left: 10px;
 }

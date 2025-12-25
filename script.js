@@ -1,112 +1,107 @@
-let data = JSON.parse(localStorage.getItem("data")) || {}
-let weekOffset = 0
-let chart
+let data = JSON.parse(localStorage.getItem("data")) || {};
+let currentWeek = new Date();
 
-// Onboarding
-if (!localStorage.getItem("seen")) {
-  document.getElementById("onboarding").style.display = "flex"
+const ctx = document.getElementById("chart");
+let chart;
+
+if (!localStorage.getItem("onboarded")) {
+  document.getElementById("onboarding").style.display = "flex";
 }
 
 function closeOnboarding() {
-  document.getElementById("onboarding").style.display = "none"
-  localStorage.setItem("seen", true)
+  localStorage.setItem("onboarded", "1");
+  document.getElementById("onboarding").style.display = "none";
 }
 
-// Date helpers
-function getWeekKey(offset=0){
-  let d = new Date()
-  d.setDate(d.getDate() - d.getDay() + 1 + offset*7)
-  return d.toISOString().slice(0,10)
+function openNewTab() {
+  document.getElementById("newTabModal").style.display = "flex";
 }
 
-function render(){
-  let key = getWeekKey(weekOffset)
-  document.getElementById("weekLabel").innerText = key
-  let list = data[key] || []
-  let box = document.getElementById("entries")
-  box.innerHTML = ""
-
-  let sum = 0
-
-  list.forEach(e=>{
-    sum += e.value
-    box.innerHTML += `<div>${e.title}: ${e.value} ${e.unit}</div>`
-  })
-
-  document.getElementById("total").innerText = "Toplam: " + sum
-
-  // Average (Mon → Yesterday)
-  let days = new Date().getDay() - 1
-  if (days < 1) days = 1
-  document.getElementById("average").innerText =
-    "Günlük Ortalama: " + (sum/days).toFixed(1)
-
-  drawChart(list)
+function closeNewTab() {
+  document.getElementById("newTabModal").style.display = "none";
 }
 
-// Add
-function addEntry(){
-  let title = document.getElementById("title").value
-  let unit = document.getElementById("unit").value
-  let value = Number(document.getElementById("value").value)
-  if(!title || !value) return
+function createTab() {
+  const name = tabName.value;
+  const unit = unitSelect.value;
+  if (!name) return;
 
-  let key = getWeekKey(weekOffset)
-  if(!data[key]) data[key]=[]
-  data[key].push({title,unit,value})
+  if (!data[name]) data[name] = {};
 
-  localStorage.setItem("data", JSON.stringify(data))
-  notify(title, value, unit)
-  render()
+  localStorage.setItem("data", JSON.stringify(data));
+  closeNewTab();
+  render();
 }
 
-// Chart
-function drawChart(list){
-  let ctx = document.getElementById("chart")
-  if(chart) chart.destroy()
+function render() {
+  document.getElementById("tabs").innerHTML = "";
 
-  chart = new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:list.map(e=>e.title),
-      datasets:[{
-        data:list.map(e=>e.value),
-        backgroundColor:'#22c55e'
+  Object.keys(data).forEach(tab => {
+    const div = document.createElement("div");
+    div.className = "tab";
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.placeholder = "Değer gir";
+    input.onchange = () => saveValue(tab, input.value);
+
+    div.innerHTML = `<h3>${tab}</h3>`;
+    div.appendChild(input);
+    document.getElementById("tabs").appendChild(div);
+  });
+
+  updateChart();
+}
+
+function saveValue(tab, value) {
+  const date = new Date().toISOString().split("T")[0];
+  if (!data[tab]) data[tab] = {};
+  data[tab][date] = Number(value);
+
+  localStorage.setItem("data", JSON.stringify(data));
+  scheduleNotification(tab, value);
+  render();
+}
+
+function updateChart() {
+  const labels = [];
+  const values = [];
+
+  Object.keys(data).forEach(tab => {
+    const sum = Object.values(data[tab]).reduce((a,b)=>a+b,0);
+    labels.push(tab);
+    values.push(sum);
+  });
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Toplam",
+        data: values
       }]
     }
-  })
+  });
 }
 
-// Navigation
-function prevWeek(){weekOffset--; render()}
-function nextWeek(){weekOffset++; render()}
-
-// Notification
-function notify(t,v,u){
-  if(Notification.permission==="granted"){
-    new Notification("EasyTrack",{
-      body:`Bugün ${t}: ${v} ${u} 💪`
-    })
-  } else {
-    Notification.requestPermission()
+function scheduleNotification(tab, value) {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+    return;
   }
+
+  setTimeout(() => {
+    new Notification("💪 EasyTrack", {
+      body: `Bugün ${tab} için ${value} yaptın. Devam!`
+    });
+  }, 3000);
 }
 
-// Export
-function exportPDF(){
-  const {jsPDF} = window.jspdf
-  let pdf = new jsPDF()
-  pdf.text(JSON.stringify(data,null,2),10,10)
-  pdf.save("easytrack.pdf")
+function goBack() {
+  history.back();
 }
 
-function exportExcel(){
-  let wb = XLSX.utils.book_new()
-  let ws = XLSX.utils.json_to_sheet(
-    Object.entries(data)
-  )
-  XLSX.utils.book_append_sheet(wb,ws,"Data")
-  XLSX.writeFile(wb,"easytrack.xlsx")
-}
-
-render()
+render();

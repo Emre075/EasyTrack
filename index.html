@@ -1,81 +1,70 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EasyTrack</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 
-  <!-- Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <!-- Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
-
 <body>
-<div id="app">
 
-  <!-- Onboarding -->
-  <div id="onboarding" class="modal">
+<!-- ONBOARDING -->
+<div id="onboarding" class="modal">
+  <div class="modal-content">
     <h2>👋 EasyTrack</h2>
-    <p>Günlük hedeflerini takip et.<br>
-       Sayfa, dakika, saat, adım, ml, litre…</p>
+    <p>Günlük hedeflerini takip et.<br>Sayfa, dakika, saat, adım, su…</p>
     <button onclick="closeOnboarding()">Başla</button>
   </div>
+</div>
 
-  <!-- Header -->
-  <header>
-    <button onclick="prevWeek()">◀</button>
-    <h1 id="weekLabel">Bu Hafta</h1>
-    <button onclick="nextWeek()">▶</button>
-  </header>
-
-  <!-- Language -->
-  <select id="lang" onchange="changeLang()">
+<header>
+  <button onclick="goBack()">⬅</button>
+  <h1>EasyTrack</h1>
+  <select id="languageSelect" onchange="setLanguage(this.value)">
     <option value="tr">TR</option>
     <option value="en">EN</option>
     <option value="nl">NL</option>
   </select>
+</header>
 
-  <!-- New Tab -->
-  <section class="card">
-    <input id="title" placeholder="Tab adı">
-    <select id="unit">
+<main id="main">
+
+  <button class="add-btn" onclick="openNewTab()">➕ Yeni Tab</button>
+
+  <div class="calendar">
+    <button onclick="prevWeek()">◀</button>
+    <span id="weekLabel"></span>
+    <button onclick="nextWeek()">▶</button>
+  </div>
+
+  <canvas id="chart"></canvas>
+
+  <div id="stats"></div>
+
+  <div id="tabs"></div>
+
+</main>
+
+<!-- NEW TAB MODAL -->
+<div id="newTabModal" class="modal">
+  <div class="modal-content">
+    <h3>Yeni Tab</h3>
+    <input id="tabName" placeholder="Tab adı" />
+    <select id="unitSelect">
       <option value="sayfa">Sayfa</option>
       <option value="dakika">Dakika</option>
       <option value="saat">Saat</option>
-      <option value="adim">Adım</option>
-      <option value="ml">ml</option>
+      <option value="adım">Adım</option>
       <option value="litre">Litre</option>
+      <option value="ml">Mililitre</option>
     </select>
-    <input id="value" type="number" placeholder="Değer">
-    <button onclick="addEntry()">Ekle</button>
-  </section>
-
-  <!-- Entries -->
-  <section id="entries"></section>
-
-  <!-- Stats -->
-  <section class="card">
-    <p id="average"></p>
-    <p id="total"></p>
-  </section>
-
-  <!-- Chart -->
-  <canvas id="chart"></canvas>
-
-  <!-- Export -->
-  <section class="card">
-    <button onclick="exportPDF()">PDF</button>
-    <button onclick="exportExcel()">Excel</button>
-  </section>
-
+    <button onclick="createTab()">Oluştur</button>
+    <button onclick="closeNewTab()">İptal</button>
+  </div>
 </div>
 
 <script src="script.js"></script>

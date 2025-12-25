@@ -10,13 +10,13 @@
 <body>
   <header>
     <button id="backBtn" class="hidden">←</button>
-    <h1 id="title">EasyTrack</h1>
+    <h1>EasyTrack</h1>
     <button id="settingsBtn">⚙️</button>
   </header>
 
   <main id="app"></main>
 
-  <!-- SETTINGS MODAL -->
+  <!-- SETTINGS -->
   <div id="settings" class="modal hidden">
     <h2>Ayarlar</h2>
 
@@ -28,16 +28,37 @@
       </select>
     </label>
 
+    <button onclick="closeSettings()">Kapat</button>
+  </div>
+
+  <!-- ADD TAB MODAL -->
+  <div id="addTabModal" class="modal hidden">
+    <h2>Yeni Tab</h2>
+
+    <input id="tabName" placeholder="Tab adı">
+
     <label>
-      Dil:
-      <select id="langSelect">
-        <option value="tr">Türkçe</option>
-        <option value="nl">Nederlands</option>
-        <option value="en">English</option>
+      Birim:
+      <select id="unitSelect">
+        <option value="Sayfa">Sayfa</option>
+        <option value="Dakika">Dakika</option>
+        <option value="Saat">Saat</option>
+        <option value="Adım">Adım</option>
+        <option value="Litre">Litre</option>
+        <option value="Adet">Adet</option>
       </select>
     </label>
 
-    <button onclick="closeSettings()">Kapat</button>
+    <button id="createTab">Oluştur</button>
+    <button onclick="closeAddTab()">İptal</button>
+  </div>
+
+  <!-- ADD ENTRY MODAL -->
+  <div id="addEntryModal" class="modal hidden">
+    <h2>Değer Gir</h2>
+    <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
+    <button id="saveEntry">Kaydet</button>
+    <button onclick="closeAddEntry()">İptal</button>
   </div>
 
   <script src="script.js"></script>

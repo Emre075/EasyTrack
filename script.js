@@ -4,21 +4,22 @@ const settingsBtn = document.getElementById("settingsBtn");
 const settings = document.getElementById("settings");
 const themeSelect = document.getElementById("themeSelect");
 
-let state = "home";
+const addTabModal = document.getElementById("addTabModal");
+const tabNameInput = document.getElementById("tabName");
+const unitSelect = document.getElementById("unitSelect");
+const createTabBtn = document.getElementById("createTab");
+
+const addEntryModal = document.getElementById("addEntryModal");
+const entryValueInput = document.getElementById("entryValue");
+const saveEntryBtn = document.getElementById("saveEntry");
+
 let activeTab = null;
+let activeDay = null;
 
 let data = JSON.parse(localStorage.getItem("easytrack")) || {
   theme: "light",
   tabs: []
 };
-
-const units = [
-  { key: "sayfa", label: "Sayfa" },
-  { key: "dakika", label: "Dakika" },
-  { key: "saat", label: "Saat" },
-  { key: "adim", label: "Adım" },
-  { key: "litre", label: "Litre" }
-];
 
 const days = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
 
@@ -48,7 +49,6 @@ function closeSettings() {
 }
 
 backBtn.onclick = () => {
-  state = "home";
   activeTab = null;
   backBtn.classList.add("hidden");
   renderHome();
@@ -66,32 +66,31 @@ function renderHome() {
 
   const addBtn = document.createElement("button");
   addBtn.textContent = "➕ Yeni Tab";
-  addBtn.onclick = addTab;
+  addBtn.onclick = () => addTabModal.classList.remove("hidden");
   app.appendChild(addBtn);
 }
 
-function addTab() {
-  const name = prompt("Tab adı:");
-  if (!name) return;
+function closeAddTab() {
+  addTabModal.classList.add("hidden");
+  tabNameInput.value = "";
+}
 
-  let unit = prompt(
-    "Birim seç:\n" + units.map(u => u.label).join(", ")
-  );
-  const found = units.find(u => u.label === unit);
-  if (!found) return alert("Geçerli birim seç");
+createTabBtn.onclick = () => {
+  const name = tabNameInput.value.trim();
+  if (!name) return alert("Tab adı gir");
 
   data.tabs.push({
     name,
-    unit: found.label,
+    unit: unitSelect.value,
     days: days.map(d => ({ name: d, entries: [] }))
   });
 
   save();
+  closeAddTab();
   renderHome();
-}
+};
 
 function openTab(i) {
-  state = "tab";
   activeTab = i;
   backBtn.classList.remove("hidden");
   app.innerHTML = "";
@@ -107,7 +106,12 @@ function openTab(i) {
     if (dIndex <= todayIndex()) {
       const btn = document.createElement("button");
       btn.textContent = "➕";
-      btn.onclick = () => addEntry(i, dIndex);
+      btn.onclick = () => {
+        activeDay = dIndex;
+        addEntryModal.classList.remove("hidden");
+        entryValueInput.value = "";
+        entryValueInput.focus();
+      };
       div.appendChild(btn);
     }
 
@@ -130,19 +134,21 @@ function openTab(i) {
   });
 }
 
-function addEntry(tabIndex, dayIndex) {
-  const value = Number(prompt("Değer gir:"));
-  if (!value) return;
-
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  data.tabs[tabIndex].days[dayIndex].entries.push({ value, time });
-  save();
-  openTab(tabIndex);
+function closeAddEntry() {
+  addEntryModal.classList.add("hidden");
 }
+
+saveEntryBtn.onclick = () => {
+  const value = Number(entryValueInput.value);
+  if (!Number.isFinite(value) || value <= 0) return alert("Sadece sayı gir");
+
+  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  data.tabs[activeTab].days[activeDay].entries.push({ value, time });
+  save();
+  closeAddEntry();
+  openTab(activeTab);
+};
 
 applyTheme();
 renderHome();

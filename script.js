@@ -1,104 +1,112 @@
-const app = document.getElementById("app");
+let data = JSON.parse(localStorage.getItem("data")) || {}
+let weekOffset = 0
+let chart
 
-const texts = {
-  tr: {
-    welcome:"Hoş geldin",
-    start:"Başla",
-    settings:"Ayarlar",
-    theme:"Tema",
-    lang:"Dil",
-    close:"Kapat",
-    newTab:"Yeni Tab",
-    unit:"Birim",
-    create:"Oluştur",
-    cancel:"İptal",
-    enter:"Değer Gir",
-    save:"Kaydet",
-    motivationLow:"Bugün düne göre daha az yaptın. Haydi toparla 💪",
-    motivationHigh:"🔥 Harika gidiyorsun, devam!"
-  },
-  en: {
-    welcome:"Welcome",
-    start:"Start",
-    settings:"Settings",
-    theme:"Theme",
-    lang:"Language",
-    close:"Close",
-    newTab:"New Tab",
-    unit:"Unit",
-    create:"Create",
-    cancel:"Cancel",
-    enter:"Enter value",
-    save:"Save",
-    motivationLow:"You did less than yesterday. Push harder 💪",
-    motivationHigh:"🔥 Great job, keep going!"
-  },
-  nl: {
-    welcome:"Welkom",
-    start:"Start",
-    settings:"Instellingen",
-    theme:"Thema",
-    lang:"Taal",
-    close:"Sluiten",
-    newTab:"Nieuwe Tab",
-    unit:"Eenheid",
-    create:"Aanmaken",
-    cancel:"Annuleren",
-    enter:"Waarde invoeren",
-    save:"Opslaan",
-    motivationLow:"Vandaag minder dan gisteren. Kom op 💪",
-    motivationHigh:"🔥 Goed bezig, ga zo door!"
+// Onboarding
+if (!localStorage.getItem("seen")) {
+  document.getElementById("onboarding").style.display = "flex"
+}
+
+function closeOnboarding() {
+  document.getElementById("onboarding").style.display = "none"
+  localStorage.setItem("seen", true)
+}
+
+// Date helpers
+function getWeekKey(offset=0){
+  let d = new Date()
+  d.setDate(d.getDate() - d.getDay() + 1 + offset*7)
+  return d.toISOString().slice(0,10)
+}
+
+function render(){
+  let key = getWeekKey(weekOffset)
+  document.getElementById("weekLabel").innerText = key
+  let list = data[key] || []
+  let box = document.getElementById("entries")
+  box.innerHTML = ""
+
+  let sum = 0
+
+  list.forEach(e=>{
+    sum += e.value
+    box.innerHTML += `<div>${e.title}: ${e.value} ${e.unit}</div>`
+  })
+
+  document.getElementById("total").innerText = "Toplam: " + sum
+
+  // Average (Mon → Yesterday)
+  let days = new Date().getDay() - 1
+  if (days < 1) days = 1
+  document.getElementById("average").innerText =
+    "Günlük Ortalama: " + (sum/days).toFixed(1)
+
+  drawChart(list)
+}
+
+// Add
+function addEntry(){
+  let title = document.getElementById("title").value
+  let unit = document.getElementById("unit").value
+  let value = Number(document.getElementById("value").value)
+  if(!title || !value) return
+
+  let key = getWeekKey(weekOffset)
+  if(!data[key]) data[key]=[]
+  data[key].push({title,unit,value})
+
+  localStorage.setItem("data", JSON.stringify(data))
+  notify(title, value, unit)
+  render()
+}
+
+// Chart
+function drawChart(list){
+  let ctx = document.getElementById("chart")
+  if(chart) chart.destroy()
+
+  chart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:list.map(e=>e.title),
+      datasets:[{
+        data:list.map(e=>e.value),
+        backgroundColor:'#22c55e'
+      }]
+    }
+  })
+}
+
+// Navigation
+function prevWeek(){weekOffset--; render()}
+function nextWeek(){weekOffset++; render()}
+
+// Notification
+function notify(t,v,u){
+  if(Notification.permission==="granted"){
+    new Notification("EasyTrack",{
+      body:`Bugün ${t}: ${v} ${u} 💪`
+    })
+  } else {
+    Notification.requestPermission()
   }
-};
-
-let data = JSON.parse(localStorage.getItem("easytrack")) || {
-  theme:"light",
-  lang:"tr",
-  firstRun:true,
-  tabs:[]
-};
-
-function t(key){ return texts[data.lang][key]; }
-
-function save(){ localStorage.setItem("easytrack",JSON.stringify(data)); }
-
-function applyLang(){
-  document.getElementById("obTitle").innerText=t("welcome");
-  document.getElementById("obBtn").innerText=t("start");
-  document.getElementById("settingsTitle").innerText=t("settings");
-  document.getElementById("themeText").innerText=t("theme");
-  document.getElementById("langText").innerText=t("lang");
-  document.getElementById("closeBtn").innerText=t("close");
-  document.getElementById("newTabText").innerText=t("newTab");
-  document.getElementById("unitText").innerText=t("unit");
-  document.getElementById("createTab").innerText=t("create");
-  document.getElementById("cancelBtn").innerText=t("cancel");
-  document.getElementById("enterValueText").innerText=t("enter");
-  document.getElementById("saveEntry").innerText=t("save");
 }
 
-function renderCharts(tab){
-  const chart=document.createElement("div");
-  chart.className="chart";
-  chart.innerHTML="<b>Haftalık Grafik</b>";
-  tab.days.forEach(d=>{
-    const total=d.entries.reduce((a,b)=>a+b.value,0);
-    const bar=document.createElement("div");
-    bar.className="bar";
-    bar.style.width=(total*10)+"px";
-    bar.innerText=total;
-    chart.appendChild(bar);
-  });
-  app.appendChild(chart);
+// Export
+function exportPDF(){
+  const {jsPDF} = window.jspdf
+  let pdf = new jsPDF()
+  pdf.text(JSON.stringify(data,null,2),10,10)
+  pdf.save("easytrack.pdf")
 }
 
-function motivation(tab){
-  const today=new Date().getDay();
-  const y=today-1;
-  if(y<0)return;
-  const todayTotal=tab.days[today]?.entries.reduce((a,b)=>a+b.value,0)||0;
-  const yTotal=tab.days[y]?.entries.reduce((a,b)=>a+b.value,0)||0;
-  alert(todayTotal<yTotal ? t("motivationLow") : t("motivationHigh"));
+function exportExcel(){
+  let wb = XLSX.utils.book_new()
+  let ws = XLSX.utils.json_to_sheet(
+    Object.entries(data)
+  )
+  XLSX.utils.book_append_sheet(wb,ws,"Data")
+  XLSX.writeFile(wb,"easytrack.xlsx")
 }
 
-applyLang();
+render()

@@ -1,16 +1,5 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
 :root {
-  --bg: #fff;
+  --bg: #ffffff;
   --text: #000;
   --card: #f2f2f2;
 }
@@ -21,48 +10,43 @@ body.dark {
   --card: #1e1e1e;
 }
 
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: env(safe-area-inset-top) 12px 12px;
+  padding: 10px;
 }
 
-main {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-button, select, input {
-  font-size: 18px;
-  padding: 12px;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.tab, .day {
-  background: var(--card);
-  margin: 12px;
-  padding: 12px;
-  border-radius: 12px;
-}
-
-.entry {
-  font-size: 14px;
-  margin-left: 8px;
+button {
+  font-size: 16px;
 }
 
 .hidden {
   display: none;
 }
 
-/* FULLSCREEN MODAL */
-.fullscreen {
+.tab, .day {
+  background: var(--card);
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.entry {
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.modal {
   position: fixed;
   inset: 0;
   background: var(--bg);
   padding: 20px;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }

@@ -1,24 +1,24 @@
 const app = document.getElementById("app");
 const backBtn = document.getElementById("backBtn");
-
+const settingsBtn = document.getElementById("settingsBtn");
 const settings = document.getElementById("settings");
-const addTab = document.getElementById("addTab");
-const addEntry = document.getElementById("addEntry");
-const onboarding = document.getElementById("onboarding");
+const themeSelect = document.getElementById("themeSelect");
 
-const tabNameInput = document.getElementById("tabName");
-const unitSelect = document.getElementById("unitSelect");
-const entryValueInput = document.getElementById("entryValue");
-
+let state = "home";
 let activeTab = null;
-let activeDay = null;
 
 let data = JSON.parse(localStorage.getItem("easytrack")) || {
-  firstRun: true,
   theme: "light",
-  lang: "tr",
   tabs: []
 };
+
+const units = [
+  { key: "sayfa", label: "Sayfa" },
+  { key: "dakika", label: "Dakika" },
+  { key: "saat", label: "Saat" },
+  { key: "adim", label: "Adım" },
+  { key: "litre", label: "Litre" }
+];
 
 const days = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
 
@@ -33,12 +33,29 @@ function todayIndex() {
 
 function applyTheme() {
   document.body.className = data.theme === "dark" ? "dark" : "";
+  themeSelect.value = data.theme;
 }
+
+themeSelect.onchange = () => {
+  data.theme = themeSelect.value;
+  save();
+  applyTheme();
+};
+
+settingsBtn.onclick = () => settings.classList.remove("hidden");
+function closeSettings() {
+  settings.classList.add("hidden");
+}
+
+backBtn.onclick = () => {
+  state = "home";
+  activeTab = null;
+  backBtn.classList.add("hidden");
+  renderHome();
+};
 
 function renderHome() {
   app.innerHTML = "";
-  backBtn.classList.add("hidden");
-
   data.tabs.forEach((tab, i) => {
     const div = document.createElement("div");
     div.className = "tab";
@@ -49,29 +66,48 @@ function renderHome() {
 
   const addBtn = document.createElement("button");
   addBtn.textContent = "➕ Yeni Tab";
-  addBtn.onclick = () => addTab.classList.remove("hidden");
+  addBtn.onclick = addTab;
   app.appendChild(addBtn);
 }
 
+function addTab() {
+  const name = prompt("Tab adı:");
+  if (!name) return;
+
+  let unit = prompt(
+    "Birim seç:\n" + units.map(u => u.label).join(", ")
+  );
+  const found = units.find(u => u.label === unit);
+  if (!found) return alert("Geçerli birim seç");
+
+  data.tabs.push({
+    name,
+    unit: found.label,
+    days: days.map(d => ({ name: d, entries: [] }))
+  });
+
+  save();
+  renderHome();
+}
+
 function openTab(i) {
+  state = "tab";
   activeTab = i;
   backBtn.classList.remove("hidden");
   app.innerHTML = "";
 
-  data.tabs[i].days.forEach((day, dIndex) => {
+  const tab = data.tabs[i];
+
+  tab.days.forEach((day, dIndex) => {
     const div = document.createElement("div");
     div.className = "day";
+
     div.innerHTML = `<strong>${day.name}</strong>`;
 
     if (dIndex <= todayIndex()) {
       const btn = document.createElement("button");
       btn.textContent = "➕";
-      btn.onclick = () => {
-        activeDay = dIndex;
-        addEntry.classList.remove("hidden");
-        entryValueInput.value = "";
-        entryValueInput.focus();
-      };
+      btn.onclick = () => addEntry(i, dIndex);
       div.appendChild(btn);
     }
 
@@ -80,58 +116,33 @@ function openTab(i) {
       total += e.value;
       const p = document.createElement("div");
       p.className = "entry";
-      p.textContent = `${e.value} ${data.tabs[i].unit} · ${e.time}`;
+      p.textContent = `${e.value} ${tab.unit} · ${e.time}`;
       div.appendChild(p);
     });
 
     if (day.entries.length) {
-      div.innerHTML += `<b>Toplam:</b> ${total} ${data.tabs[i].unit}`;
+      const t = document.createElement("div");
+      t.innerHTML = `<b>Toplam:</b> ${total} ${tab.unit}`;
+      div.appendChild(t);
     }
 
     app.appendChild(div);
   });
 }
 
-document.getElementById("createTab").onclick = () => {
-  if (!tabNameInput.value) return;
+function addEntry(tabIndex, dayIndex) {
+  const value = Number(prompt("Değer gir:"));
+  if (!value) return;
 
-  data.tabs.push({
-    name: tabNameInput.value,
-    unit: unitSelect.value,
-    days: days.map(d => ({ name: d, entries: [] }))
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
   });
 
-  tabNameInput.value = "";
-  addTab.classList.add("hidden");
+  data.tabs[tabIndex].days[dayIndex].entries.push({ value, time });
   save();
-  renderHome();
-};
-
-document.getElementById("saveEntry").onclick = () => {
-  const v = Number(entryValueInput.value);
-  if (!v) return;
-
-  const time = new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-  data.tabs[activeTab].days[activeDay].entries.push({ value: v, time });
-
-  save();
-  addEntry.classList.add("hidden");
-  openTab(activeTab);
-};
-
-function closeAddTab(){ addTab.classList.add("hidden"); }
-function closeAddEntry(){ addEntry.classList.add("hidden"); }
-function closeSettings(){ settings.classList.add("hidden"); }
-
-backBtn.onclick = renderHome;
-document.getElementById("settingsBtn").onclick = () => settings.classList.remove("hidden");
-
-function finishOnboarding() {
-  data.firstRun = false;
-  save();
-  onboarding.classList.add("hidden");
+  openTab(tabIndex);
 }
 
 applyTheme();
-if (data.firstRun) onboarding.classList.remove("hidden");
 renderHome();

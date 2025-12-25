@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EasyTrack</title>
 
   <link rel="manifest" href="manifest.json">
@@ -12,7 +12,7 @@
 
 <header>
   <button id="backBtn" class="hidden">←</button>
-  <h1>EasyTrack</h1>
+  <h1 id="title">EasyTrack</h1>
   <button id="settingsBtn">⚙️</button>
 </header>
 
@@ -20,37 +20,43 @@
 
 <!-- ONBOARDING -->
 <div id="onboarding" class="modal hidden">
-  <h2>👋 EasyTrack’e Hoş Geldin</h2>
-  <p>• Yeni tab oluştur</p>
-  <p>• Günlük girişlerini ekle</p>
-  <p>• Haftalık toplamını takip et</p>
-  <p>• Bildirimlerle motive ol 🔔</p>
-  <button onclick="closeOnboarding()">Başla</button>
+  <h2 id="obTitle"></h2>
+  <p id="ob1"></p>
+  <p id="ob2"></p>
+  <p id="ob3"></p>
+  <button onclick="closeOnboarding()" id="obBtn"></button>
 </div>
 
 <!-- SETTINGS -->
 <div id="settings" class="modal hidden">
-  <h2>Ayarlar</h2>
+  <h2 id="settingsTitle"></h2>
 
   <label>
-    Tema:
+    <span id="themeText"></span>
     <select id="themeSelect">
-      <option value="light">Açık</option>
-      <option value="dark">Karanlık</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
     </select>
   </label>
 
-  <button onclick="closeSettings()">Kapat</button>
+  <label>
+    <span id="langText"></span>
+    <select id="langSelect">
+      <option value="tr">Türkçe</option>
+      <option value="en">English</option>
+      <option value="nl">Nederlands</option>
+    </select>
+  </label>
+
+  <button onclick="closeSettings()" id="closeBtn"></button>
 </div>
 
 <!-- ADD TAB -->
 <div id="addTabModal" class="modal hidden">
-  <h2>Yeni Tab</h2>
-
-  <input id="tabName" placeholder="Tab adı">
-
+  <h2 id="newTabText"></h2>
+  <input id="tabName" placeholder="">
   <label>
-    Birim:
+    <span id="unitText"></span>
     <select id="unitSelect">
       <option>Sayfa</option>
       <option>Dakika</option>
@@ -60,17 +66,16 @@
       <option>Adet</option>
     </select>
   </label>
-
-  <button id="createTab">Oluştur</button>
-  <button onclick="closeAddTab()">İptal</button>
+  <button id="createTab"></button>
+  <button onclick="closeAddTab()" id="cancelBtn"></button>
 </div>
 
 <!-- ADD ENTRY -->
 <div id="addEntryModal" class="modal hidden">
-  <h2>Değer Gir</h2>
-  <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
-  <button id="saveEntry">Kaydet</button>
-  <button onclick="closeAddEntry()">İptal</button>
+  <h2 id="enterValueText"></h2>
+  <input id="entryValue" type="number" inputmode="numeric">
+  <button id="saveEntry"></button>
+  <button onclick="closeAddEntry()" id="cancelBtn2"></button>
 </div>
 
 <script src="script.js"></script>

@@ -1,8 +1,9 @@
 {
-  "name": "EasyTrack",
-  "short_name": "EasyTrack",
+  "name": "Haftalık Takip",
+  "short_name": "Takip",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007aff"
+  "background_color": "#020617",
+  "theme_color": "#2563eb",
+  "icons": []
 }

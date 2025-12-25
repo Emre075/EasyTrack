@@ -1,76 +1,46 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EasyTrack</title>
-
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haftalık Takip</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div id="onboarding" class="overlay hidden">
+  <div class="card">
+    <h2>👋 Hoş geldin kanka</h2>
+    <p>Bu uygulama haftalık hedeflerini takip etmen için.</p>
+    <ul>
+      <li>📅 Her hafta Pazartesi sıfırlanır</li>
+      <li>🔙 Geçmiş haftalara bakabilirsin</li>
+      <li>⛔ Gelecek günlere giriş yok</li>
+    </ul>
+    <button onclick="closeOnboarding()">Başla</button>
+  </div>
+</div>
+
 <header>
-  <button id="backBtn" class="hidden">←</button>
-  <h1>EasyTrack</h1>
-  <button id="settingsBtn">⚙️</button>
+  <button onclick="prevWeek()">⬅</button>
+  <h1 id="weekTitle"></h1>
+  <button onclick="nextWeek()">➡</button>
 </header>
 
-<main id="app"></main>
+<main id="tabs"></main>
 
-<!-- ONBOARDING -->
-<div id="onboarding" class="modal hidden">
-  <h2>👋 EasyTrack’e Hoş Geldin</h2>
-  <p>• Yeni tab oluştur</p>
-  <p>• Günlük girişlerini ekle</p>
-  <p>• Haftalık toplamını takip et</p>
-  <p>• Bildirimlerle motive ol 🔔</p>
-  <button onclick="closeOnboarding()">Başla</button>
-</div>
+<button id="addTab" onclick="addTab()">➕ Yeni Tab</button>
 
-<!-- SETTINGS -->
-<div id="settings" class="modal hidden">
-  <h2>Ayarlar</h2>
+<nav>
+  <button onclick="openSettings()">⚙ Ayarlar</button>
+</nav>
 
-  <label>
-    Tema:
-    <select id="themeSelect">
-      <option value="light">Açık</option>
-      <option value="dark">Karanlık</option>
-    </select>
-  </label>
-
-  <button onclick="closeSettings()">Kapat</button>
-</div>
-
-<!-- ADD TAB -->
-<div id="addTabModal" class="modal hidden">
-  <h2>Yeni Tab</h2>
-
-  <input id="tabName" placeholder="Tab adı">
-
-  <label>
-    Birim:
-    <select id="unitSelect">
-      <option>Sayfa</option>
-      <option>Dakika</option>
-      <option>Saat</option>
-      <option>Adım</option>
-      <option>Litre</option>
-      <option>Adet</option>
-    </select>
-  </label>
-
-  <button id="createTab">Oluştur</button>
-  <button onclick="closeAddTab()">İptal</button>
-</div>
-
-<!-- ADD ENTRY -->
-<div id="addEntryModal" class="modal hidden">
-  <h2>Değer Gir</h2>
-  <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
-  <button id="saveEntry">Kaydet</button>
-  <button onclick="closeAddEntry()">İptal</button>
+<div id="settings" class="overlay hidden">
+  <div class="card">
+    <h2>Ayarlar</h2>
+    <button onclick="enableNotifications()">🔔 Bildirimleri Aç</button>
+    <button onclick="closeSettings()">Kapat</button>
+  </div>
 </div>
 
 <script src="script.js"></script>

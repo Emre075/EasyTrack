@@ -1,192 +1,100 @@
-const app = document.getElementById("app");
-const backBtn = document.getElementById("backBtn");
-const settingsBtn = document.getElementById("settingsBtn");
+let currentWeekOffset = 0;
+let data = JSON.parse(localStorage.getItem("data")) || {};
 
-const settings = document.getElementById("settings");
-const onboarding = document.getElementById("onboarding");
+const units = ["sayfa", "dakika", "saat", "adım", "litre"];
 
-const themeSelect = document.getElementById("themeSelect");
-
-const addTabModal = document.getElementById("addTabModal");
-const tabNameInput = document.getElementById("tabName");
-const unitSelect = document.getElementById("unitSelect");
-
-const addEntryModal = document.getElementById("addEntryModal");
-const entryValueInput = document.getElementById("entryValue");
-
-let activeTab = null;
-let activeDay = null;
-
-const days = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
-
-let data = JSON.parse(localStorage.getItem("easytrack")) || {
-  version: 2,
-  theme: "light",
-  firstRun: true,
-  tabs: []
-};
-
-function save() {
-  localStorage.setItem("easytrack", JSON.stringify(data));
+function getWeekKey(offset = 0) {
+  const now = new Date();
+  now.setDate(now.getDate() + offset * 7);
+  const monday = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+  return monday.toISOString().slice(0,10);
 }
 
-function todayIndex() {
-  const d = new Date().getDay();
-  return d === 0 ? 6 : d - 1;
-}
+function render() {
+  const weekKey = getWeekKey(currentWeekOffset);
+  document.getElementById("weekTitle").innerText = "Hafta: " + weekKey;
+  const container = document.getElementById("tabs");
+  container.innerHTML = "";
 
-function applyTheme() {
-  document.body.className = data.theme === "dark" ? "dark" : "";
-  themeSelect.value = data.theme;
-}
+  data[weekKey] = data[weekKey] || [];
 
-themeSelect.onchange = () => {
-  data.theme = themeSelect.value;
-  save();
-  applyTheme();
-};
-
-settingsBtn.onclick = () => settings.classList.remove("hidden");
-function closeSettings() { settings.classList.add("hidden"); }
-
-function closeOnboarding() {
-  onboarding.classList.add("hidden");
-  data.firstRun = false;
-  save();
-}
-
-function renderHome() {
-  app.innerHTML = "";
-
-  data.tabs.forEach((tab, i) => {
+  data[weekKey].forEach((tab, i) => {
     const div = document.createElement("div");
     div.className = "tab";
-    div.textContent = `${tab.name} (${tab.unit})`;
-    div.onclick = () => openTab(i);
-    app.appendChild(div);
+    div.innerHTML = `
+      <h3>${tab.name}</h3>
+      <select onchange="updateUnit('${weekKey}',${i},this.value)">
+        ${units.map(u => `<option ${u===tab.unit?"selected":""}>${u}</option>`).join("")}
+      </select>
+      <input type="number" min="0" value="${tab.value}" 
+        ${isFutureDay()? "disabled":""}
+        onchange="updateValue('${weekKey}',${i},this.value)">
+    `;
+    container.appendChild(div);
   });
 
-  const addBtn = document.createElement("button");
-  addBtn.textContent = "➕ Yeni Tab";
-  addBtn.onclick = () => addTabModal.classList.remove("hidden");
-  app.appendChild(addBtn);
+  localStorage.setItem("data", JSON.stringify(data));
 }
 
-function closeAddTab() {
-  addTabModal.classList.add("hidden");
-  tabNameInput.value = "";
+function addTab() {
+  const name = prompt("Tab adı:");
+  if (!name) return;
+  const weekKey = getWeekKey(currentWeekOffset);
+  data[weekKey].push({ name, unit: "dakika", value: 0 });
+  render();
 }
 
-document.getElementById("createTab").onclick = () => {
-  const name = tabNameInput.value.trim();
-  if (!name) return alert("Tab adı gir");
-
-  data.tabs.push({
-    name,
-    unit: unitSelect.value,
-    days: days.map(d => ({ name: d, entries: [] }))
-  });
-
-  save();
-  closeAddTab();
-  renderHome();
-};
-
-function openTab(i) {
-  activeTab = i;
-  backBtn.classList.remove("hidden");
-  app.innerHTML = "";
-
-  const tab = data.tabs[i];
-  const today = todayIndex();
-
-  let weeklyTotal = 0;
-  let countedDays = today + 1; // BUGÜNE KADAR OLAN GÜNLER
-
-  tab.days.forEach((day, dIndex) => {
-    if (dIndex > today) return;
-
-    const div = document.createElement("div");
-    div.className = "day";
-    if (dIndex === today) div.classList.add("today");
-
-    const header = document.createElement("div");
-    header.className = "day-header";
-    header.innerHTML = `<strong>${day.name}</strong>`;
-
-    const btn = document.createElement("button");
-    btn.textContent = "➕";
-    btn.onclick = () => {
-      activeDay = dIndex;
-      addEntryModal.classList.remove("hidden");
-      entryValueInput.value = "";
-    };
-    header.appendChild(btn);
-
-    div.appendChild(header);
-
-    let dailyTotal = 0;
-
-    if (day.entries.length === 0) {
-      div.innerHTML += `<div class="entry">0 ${tab.unit}</div>`;
-    }
-
-    day.entries.forEach(e => {
-      dailyTotal += e.value;
-      const p = document.createElement("div");
-      p.className = "entry";
-      p.textContent = `${e.value} ${tab.unit} · ${e.time}`;
-      div.appendChild(p);
-    });
-
-    weeklyTotal += dailyTotal;
-
-    div.innerHTML += `<b>Toplam:</b> ${dailyTotal} ${tab.unit}`;
-    app.appendChild(div);
-  });
-
-  const avg = countedDays > 0 ? (weeklyTotal / countedDays).toFixed(1) : 0;
-
-  const stats = document.createElement("div");
-  stats.className = "tab";
-  stats.innerHTML = `
-    📊 Haftalık Toplam: <b>${weeklyTotal}</b> ${tab.unit}<br>
-    📈 Günlük Ortalama: <b>${avg}</b> ${tab.unit}
-  `;
-  app.appendChild(stats);
+function updateValue(week,i,val) {
+  data[week][i].value = Number(val);
+  render();
 }
 
-backBtn.onclick = () => {
-  activeTab = null;
-  backBtn.classList.add("hidden");
-  renderHome();
-};
-
-function closeAddEntry() {
-  addEntryModal.classList.add("hidden");
+function updateUnit(week,i,unit) {
+  data[week][i].unit = unit;
+  render();
 }
 
-document.getElementById("saveEntry").onclick = () => {
-  const value = Number(entryValueInput.value);
+function prevWeek() {
+  currentWeekOffset--;
+  render();
+}
 
-  // ✅ 0 SERBEST, NEGATİF YOK
-  if (!Number.isFinite(value) || value < 0) {
-    return alert("0 veya pozitif sayı gir");
+function nextWeek() {
+  if (currentWeekOffset < 0) {
+    currentWeekOffset++;
+    render();
   }
+}
 
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
+function isFutureDay() {
+  return currentWeekOffset > 0;
+}
+
+function openSettings() {
+  document.getElementById("settings").classList.remove("hidden");
+}
+
+function closeSettings() {
+  document.getElementById("settings").classList.add("hidden");
+}
+
+function enableNotifications() {
+  Notification.requestPermission().then(p => {
+    if (p === "granted") {
+      new Notification("🔥 Hadi kanka!", {
+        body: "Bugünkü hedeflerini yapmayı unutma!"
+      });
+    }
   });
+}
 
-  data.tabs[activeTab].days[activeDay].entries.push({ value, time });
+function closeOnboarding() {
+  document.getElementById("onboarding").classList.add("hidden");
+  localStorage.setItem("seenOnboarding", "1");
+}
 
-  save();
-  closeAddEntry();
-  openTab(activeTab);
-};
+if (!localStorage.getItem("seenOnboarding")) {
+  document.getElementById("onboarding").classList.remove("hidden");
+}
 
-applyTheme();
-renderHome();
-
-if (data.firstRun) onboarding.classList.remove("hidden");
+render();

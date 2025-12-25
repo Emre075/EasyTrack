@@ -2,10 +2,11 @@
   --bg: #ffffff;
   --text: #000;
   --card: #f2f2f2;
+  --accent: #007aff;
 }
 
 body.dark {
-  --bg: #111;
+  --bg: #121212;
   --text: #fff;
   --card: #1e1e1e;
 }
@@ -24,19 +25,29 @@ header {
   padding: 10px;
 }
 
-button {
-  font-size: 16px;
-}
+.hidden { display: none; }
 
-.hidden {
-  display: none;
+button {
+  padding: 8px 12px;
+  font-size: 16px;
 }
 
 .tab, .day {
   background: var(--card);
   margin: 10px;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
+}
+
+.day.today {
+  border: 2px solid var(--accent);
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
 }
 
 .entry {
@@ -49,4 +60,5 @@ button {
   inset: 0;
   background: var(--bg);
   padding: 20px;
+  z-index: 10;
 }

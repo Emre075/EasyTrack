@@ -1,66 +1,78 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EasyTrack</title>
+
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <button id="backBtn" class="hidden">←</button>
-    <h1>EasyTrack</h1>
-    <button id="settingsBtn">⚙️</button>
-  </header>
 
-  <main id="app"></main>
+<header>
+  <button id="backBtn" class="hidden">←</button>
+  <h1>EasyTrack</h1>
+  <button id="settingsBtn">⚙️</button>
+</header>
 
-  <!-- SETTINGS -->
-  <div id="settings" class="modal hidden">
-    <h2>Ayarlar</h2>
+<main id="app"></main>
 
-    <label>
-      Tema:
-      <select id="themeSelect">
-        <option value="light">Açık</option>
-        <option value="dark">Karanlık</option>
-      </select>
-    </label>
+<!-- ONBOARDING -->
+<div id="onboarding" class="modal hidden">
+  <h2>👋 EasyTrack’e Hoş Geldin</h2>
+  <p>• Yeni tab oluştur</p>
+  <p>• Günlük girişlerini ekle</p>
+  <p>• Haftalık toplamını takip et</p>
+  <p>• Bildirimlerle motive ol 🔔</p>
+  <button onclick="closeOnboarding()">Başla</button>
+</div>
 
-    <button onclick="closeSettings()">Kapat</button>
-  </div>
+<!-- SETTINGS -->
+<div id="settings" class="modal hidden">
+  <h2>Ayarlar</h2>
 
-  <!-- ADD TAB MODAL -->
-  <div id="addTabModal" class="modal hidden">
-    <h2>Yeni Tab</h2>
+  <label>
+    Tema:
+    <select id="themeSelect">
+      <option value="light">Açık</option>
+      <option value="dark">Karanlık</option>
+    </select>
+  </label>
 
-    <input id="tabName" placeholder="Tab adı">
+  <button onclick="closeSettings()">Kapat</button>
+</div>
 
-    <label>
-      Birim:
-      <select id="unitSelect">
-        <option value="Sayfa">Sayfa</option>
-        <option value="Dakika">Dakika</option>
-        <option value="Saat">Saat</option>
-        <option value="Adım">Adım</option>
-        <option value="Litre">Litre</option>
-        <option value="Adet">Adet</option>
-      </select>
-    </label>
+<!-- ADD TAB -->
+<div id="addTabModal" class="modal hidden">
+  <h2>Yeni Tab</h2>
 
-    <button id="createTab">Oluştur</button>
-    <button onclick="closeAddTab()">İptal</button>
-  </div>
+  <input id="tabName" placeholder="Tab adı">
 
-  <!-- ADD ENTRY MODAL -->
-  <div id="addEntryModal" class="modal hidden">
-    <h2>Değer Gir</h2>
-    <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
-    <button id="saveEntry">Kaydet</button>
-    <button onclick="closeAddEntry()">İptal</button>
-  </div>
+  <label>
+    Birim:
+    <select id="unitSelect">
+      <option>Sayfa</option>
+      <option>Dakika</option>
+      <option>Saat</option>
+      <option>Adım</option>
+      <option>Litre</option>
+      <option>Adet</option>
+    </select>
+  </label>
 
-  <script src="script.js"></script>
+  <button id="createTab">Oluştur</button>
+  <button onclick="closeAddTab()">İptal</button>
+</div>
+
+<!-- ADD ENTRY -->
+<div id="addEntryModal" class="modal hidden">
+  <h2>Değer Gir</h2>
+  <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
+  <button id="saveEntry">Kaydet</button>
+  <button onclick="closeAddEntry()">İptal</button>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

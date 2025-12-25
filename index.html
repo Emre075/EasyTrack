@@ -1,70 +1,81 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EasyTrack</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<!-- ONBOARDING -->
-<div id="onboarding" class="modal">
-  <div class="modal-content">
-    <h2>👋 EasyTrack</h2>
-    <p>Günlük hedeflerini takip et.<br>Sayfa, dakika, saat, adım, su…</p>
-    <button onclick="closeOnboarding()">Başla</button>
-  </div>
-</div>
-
 <header>
-  <button onclick="goBack()">⬅</button>
-  <h1>EasyTrack</h1>
-  <select id="languageSelect" onchange="setLanguage(this.value)">
-    <option value="tr">TR</option>
-    <option value="en">EN</option>
-    <option value="nl">NL</option>
-  </select>
+  <button id="backBtn" class="hidden">←</button>
+  <h1 id="title">EasyTrack</h1>
+  <button id="settingsBtn">⚙️</button>
 </header>
 
-<main id="main">
+<main id="app"></main>
 
-  <button class="add-btn" onclick="openNewTab()">➕ Yeni Tab</button>
+<!-- ONBOARDING -->
+<div id="onboarding" class="modal hidden">
+  <h2 id="obTitle"></h2>
+  <p id="ob1"></p>
+  <p id="ob2"></p>
+  <p id="ob3"></p>
+  <button onclick="closeOnboarding()" id="obBtn"></button>
+</div>
 
-  <div class="calendar">
-    <button onclick="prevWeek()">◀</button>
-    <span id="weekLabel"></span>
-    <button onclick="nextWeek()">▶</button>
-  </div>
+<!-- SETTINGS -->
+<div id="settings" class="modal hidden">
+  <h2 id="settingsTitle"></h2>
 
-  <canvas id="chart"></canvas>
-
-  <div id="stats"></div>
-
-  <div id="tabs"></div>
-
-</main>
-
-<!-- NEW TAB MODAL -->
-<div id="newTabModal" class="modal">
-  <div class="modal-content">
-    <h3>Yeni Tab</h3>
-    <input id="tabName" placeholder="Tab adı" />
-    <select id="unitSelect">
-      <option value="sayfa">Sayfa</option>
-      <option value="dakika">Dakika</option>
-      <option value="saat">Saat</option>
-      <option value="adım">Adım</option>
-      <option value="litre">Litre</option>
-      <option value="ml">Mililitre</option>
+  <label>
+    <span id="themeText"></span>
+    <select id="themeSelect">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
     </select>
-    <button onclick="createTab()">Oluştur</button>
-    <button onclick="closeNewTab()">İptal</button>
-  </div>
+  </label>
+
+  <label>
+    <span id="langText"></span>
+    <select id="langSelect">
+      <option value="tr">Türkçe</option>
+      <option value="en">English</option>
+      <option value="nl">Nederlands</option>
+    </select>
+  </label>
+
+  <button onclick="closeSettings()" id="closeBtn"></button>
+</div>
+
+<!-- ADD TAB -->
+<div id="addTabModal" class="modal hidden">
+  <h2 id="newTabText"></h2>
+  <input id="tabName" placeholder="">
+  <label>
+    <span id="unitText"></span>
+    <select id="unitSelect">
+      <option>Sayfa</option>
+      <option>Dakika</option>
+      <option>Saat</option>
+      <option>Adım</option>
+      <option>Litre</option>
+      <option>Adet</option>
+    </select>
+  </label>
+  <button id="createTab"></button>
+  <button onclick="closeAddTab()" id="cancelBtn"></button>
+</div>
+
+<!-- ADD ENTRY -->
+<div id="addEntryModal" class="modal hidden">
+  <h2 id="enterValueText"></h2>
+  <input id="entryValue" type="number" inputmode="numeric">
+  <button id="saveEntry"></button>
+  <button onclick="closeAddEntry()" id="cancelBtn2"></button>
 </div>
 
 <script src="script.js"></script>

@@ -1,107 +1,104 @@
-let data = JSON.parse(localStorage.getItem("data")) || {};
-let currentWeek = new Date();
+const app = document.getElementById("app");
 
-const ctx = document.getElementById("chart");
-let chart;
-
-if (!localStorage.getItem("onboarded")) {
-  document.getElementById("onboarding").style.display = "flex";
-}
-
-function closeOnboarding() {
-  localStorage.setItem("onboarded", "1");
-  document.getElementById("onboarding").style.display = "none";
-}
-
-function openNewTab() {
-  document.getElementById("newTabModal").style.display = "flex";
-}
-
-function closeNewTab() {
-  document.getElementById("newTabModal").style.display = "none";
-}
-
-function createTab() {
-  const name = tabName.value;
-  const unit = unitSelect.value;
-  if (!name) return;
-
-  if (!data[name]) data[name] = {};
-
-  localStorage.setItem("data", JSON.stringify(data));
-  closeNewTab();
-  render();
-}
-
-function render() {
-  document.getElementById("tabs").innerHTML = "";
-
-  Object.keys(data).forEach(tab => {
-    const div = document.createElement("div");
-    div.className = "tab";
-
-    const input = document.createElement("input");
-    input.type = "number";
-    input.placeholder = "Değer gir";
-    input.onchange = () => saveValue(tab, input.value);
-
-    div.innerHTML = `<h3>${tab}</h3>`;
-    div.appendChild(input);
-    document.getElementById("tabs").appendChild(div);
-  });
-
-  updateChart();
-}
-
-function saveValue(tab, value) {
-  const date = new Date().toISOString().split("T")[0];
-  if (!data[tab]) data[tab] = {};
-  data[tab][date] = Number(value);
-
-  localStorage.setItem("data", JSON.stringify(data));
-  scheduleNotification(tab, value);
-  render();
-}
-
-function updateChart() {
-  const labels = [];
-  const values = [];
-
-  Object.keys(data).forEach(tab => {
-    const sum = Object.values(data[tab]).reduce((a,b)=>a+b,0);
-    labels.push(tab);
-    values.push(sum);
-  });
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [{
-        label: "Toplam",
-        data: values
-      }]
-    }
-  });
-}
-
-function scheduleNotification(tab, value) {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-    return;
+const texts = {
+  tr: {
+    welcome:"Hoş geldin",
+    start:"Başla",
+    settings:"Ayarlar",
+    theme:"Tema",
+    lang:"Dil",
+    close:"Kapat",
+    newTab:"Yeni Tab",
+    unit:"Birim",
+    create:"Oluştur",
+    cancel:"İptal",
+    enter:"Değer Gir",
+    save:"Kaydet",
+    motivationLow:"Bugün düne göre daha az yaptın. Haydi toparla 💪",
+    motivationHigh:"🔥 Harika gidiyorsun, devam!"
+  },
+  en: {
+    welcome:"Welcome",
+    start:"Start",
+    settings:"Settings",
+    theme:"Theme",
+    lang:"Language",
+    close:"Close",
+    newTab:"New Tab",
+    unit:"Unit",
+    create:"Create",
+    cancel:"Cancel",
+    enter:"Enter value",
+    save:"Save",
+    motivationLow:"You did less than yesterday. Push harder 💪",
+    motivationHigh:"🔥 Great job, keep going!"
+  },
+  nl: {
+    welcome:"Welkom",
+    start:"Start",
+    settings:"Instellingen",
+    theme:"Thema",
+    lang:"Taal",
+    close:"Sluiten",
+    newTab:"Nieuwe Tab",
+    unit:"Eenheid",
+    create:"Aanmaken",
+    cancel:"Annuleren",
+    enter:"Waarde invoeren",
+    save:"Opslaan",
+    motivationLow:"Vandaag minder dan gisteren. Kom op 💪",
+    motivationHigh:"🔥 Goed bezig, ga zo door!"
   }
+};
 
-  setTimeout(() => {
-    new Notification("💪 EasyTrack", {
-      body: `Bugün ${tab} için ${value} yaptın. Devam!`
-    });
-  }, 3000);
+let data = JSON.parse(localStorage.getItem("easytrack")) || {
+  theme:"light",
+  lang:"tr",
+  firstRun:true,
+  tabs:[]
+};
+
+function t(key){ return texts[data.lang][key]; }
+
+function save(){ localStorage.setItem("easytrack",JSON.stringify(data)); }
+
+function applyLang(){
+  document.getElementById("obTitle").innerText=t("welcome");
+  document.getElementById("obBtn").innerText=t("start");
+  document.getElementById("settingsTitle").innerText=t("settings");
+  document.getElementById("themeText").innerText=t("theme");
+  document.getElementById("langText").innerText=t("lang");
+  document.getElementById("closeBtn").innerText=t("close");
+  document.getElementById("newTabText").innerText=t("newTab");
+  document.getElementById("unitText").innerText=t("unit");
+  document.getElementById("createTab").innerText=t("create");
+  document.getElementById("cancelBtn").innerText=t("cancel");
+  document.getElementById("enterValueText").innerText=t("enter");
+  document.getElementById("saveEntry").innerText=t("save");
 }
 
-function goBack() {
-  history.back();
+function renderCharts(tab){
+  const chart=document.createElement("div");
+  chart.className="chart";
+  chart.innerHTML="<b>Haftalık Grafik</b>";
+  tab.days.forEach(d=>{
+    const total=d.entries.reduce((a,b)=>a+b.value,0);
+    const bar=document.createElement("div");
+    bar.className="bar";
+    bar.style.width=(total*10)+"px";
+    bar.innerText=total;
+    chart.appendChild(bar);
+  });
+  app.appendChild(chart);
 }
 
-render();
+function motivation(tab){
+  const today=new Date().getDay();
+  const y=today-1;
+  if(y<0)return;
+  const todayTotal=tab.days[today]?.entries.reduce((a,b)=>a+b.value,0)||0;
+  const yTotal=tab.days[y]?.entries.reduce((a,b)=>a+b.value,0)||0;
+  alert(todayTotal<yTotal ? t("motivationLow") : t("motivationHigh"));
+}
+
+applyLang();

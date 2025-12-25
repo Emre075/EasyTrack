@@ -1,137 +1,138 @@
-const app = document.getElementById("app");
-const backBtn = document.getElementById("backBtn");
+let data = JSON.parse(localStorage.getItem("easytrack") || "{}");
+let currentTab = null;
+let chart = null;
 
-const settings = document.getElementById("settings");
-const addTab = document.getElementById("addTab");
-const addEntry = document.getElementById("addEntry");
-const onboarding = document.getElementById("onboarding");
-
-const tabNameInput = document.getElementById("tabName");
-const unitSelect = document.getElementById("unitSelect");
-const entryValueInput = document.getElementById("entryValue");
-
-let activeTab = null;
-let activeDay = null;
-
-let data = JSON.parse(localStorage.getItem("easytrack")) || {
-  firstRun: true,
-  theme: "light",
-  lang: "tr",
-  tabs: []
-};
-
-const days = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
-
-function save() {
+function save(){
   localStorage.setItem("easytrack", JSON.stringify(data));
 }
 
-function todayIndex() {
-  const d = new Date().getDay();
-  return d === 0 ? 6 : d - 1;
+function renderTabs(){
+  const tabList = document.getElementById("tabList");
+  tabList.innerHTML = "";
+  Object.keys(data).forEach(name=>{
+    const d = document.createElement("div");
+    d.className = "tab";
+    d.innerText = name;
+    d.onclick = ()=>openTab(name);
+    tabList.appendChild(d);
+  });
 }
 
-function applyTheme() {
-  document.body.className = data.theme === "dark" ? "dark" : "";
+function addTab(){
+  const input = document.getElementById("newTabName");
+  const name = input.value.trim();
+  if(!name || data[name]) return;
+  data[name] = [];
+  save();
+  renderTabs();
+  input.value = "";
 }
 
-function renderHome() {
-  app.innerHTML = "";
-  backBtn.classList.add("hidden");
+function openTab(name){
+  currentTab = name;
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("tabView").classList.remove("hidden");
+  document.getElementById("tabTitle").innerText = name;
+  renderAll();
+}
 
-  data.tabs.forEach((tab, i) => {
-    const div = document.createElement("div");
-    div.className = "tab";
-    div.textContent = `${tab.name} (${tab.unit})`;
-    div.onclick = () => openTab(i);
-    app.appendChild(div);
+function goHome(){
+  document.getElementById("tabView").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+}
+
+function addEntry(){
+  const value = Number(document.getElementById("value").value);
+  const unit = document.getElementById("unit").value;
+  if(!value) return;
+
+  data[currentTab].push({
+    value,
+    unit,
+    time: new Date().toISOString()
   });
 
-  const addBtn = document.createElement("button");
-  addBtn.textContent = "➕ Yeni Tab";
-  addBtn.onclick = () => addTab.classList.remove("hidden");
-  app.appendChild(addBtn);
+  save();
+  document.getElementById("value").value = "";
+  renderAll();
 }
 
-function openTab(i) {
-  activeTab = i;
-  backBtn.classList.remove("hidden");
-  app.innerHTML = "";
+function renderAll(){
+  renderEntries();
+  renderChart();
+  renderWeekly();
+}
 
-  data.tabs[i].days.forEach((day, dIndex) => {
-    const div = document.createElement("div");
-    div.className = "day";
-    div.innerHTML = `<strong>${day.name}</strong>`;
+function renderEntries(){
+  const entries = document.getElementById("entries");
+  entries.innerHTML = "";
 
-    if (dIndex <= todayIndex()) {
-      const btn = document.createElement("button");
-      btn.textContent = "➕";
-      btn.onclick = () => {
-        activeDay = dIndex;
-        addEntry.classList.remove("hidden");
-        entryValueInput.value = "";
-        entryValueInput.focus();
-      };
-      div.appendChild(btn);
+  data[currentTab].forEach(e=>{
+    const d = document.createElement("div");
+    d.className = "item";
+    d.innerHTML = `
+      <input type="number" value="${e.value}" style="width:80px">
+      <span>${e.unit} • ${new Date(e.time).toLocaleString()}</span>
+      <button class="ghost">💾</button>
+    `;
+    d.querySelector("button").onclick = ()=>{
+      e.value = Number(d.querySelector("input").value);
+      save();
+      renderAll();
+    };
+    entries.appendChild(d);
+  });
+}
+
+function renderChart(){
+  const ctx = document.getElementById("chart");
+  if(chart) chart.destroy();
+
+  chart = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:data[currentTab].map(e=>new Date(e.time).toLocaleTimeString()),
+      datasets:[{
+        label:"Progress",
+        data:data[currentTab].map(e=>e.value),
+        borderWidth:2
+      }]
     }
+  });
+}
 
-    let total = 0;
-    day.entries.forEach(e => {
+function renderWeekly(){
+  let total = 0;
+  const now = new Date();
+
+  data[currentTab].forEach(e=>{
+    const d = new Date(e.time);
+    if((now - d) / 86400000 <= 7){
       total += e.value;
-      const p = document.createElement("div");
-      p.className = "entry";
-      p.textContent = `${e.value} ${data.tabs[i].unit} · ${e.time}`;
-      div.appendChild(p);
-    });
-
-    if (day.entries.length) {
-      div.innerHTML += `<b>Toplam:</b> ${total} ${data.tabs[i].unit}`;
     }
-
-    app.appendChild(div);
-  });
-}
-
-document.getElementById("createTab").onclick = () => {
-  if (!tabNameInput.value) return;
-
-  data.tabs.push({
-    name: tabNameInput.value,
-    unit: unitSelect.value,
-    days: days.map(d => ({ name: d, entries: [] }))
   });
 
-  tabNameInput.value = "";
-  addTab.classList.add("hidden");
-  save();
-  renderHome();
-};
-
-document.getElementById("saveEntry").onclick = () => {
-  const v = Number(entryValueInput.value);
-  if (!v) return;
-
-  const time = new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-  data.tabs[activeTab].days[activeDay].entries.push({ value: v, time });
-
-  save();
-  addEntry.classList.add("hidden");
-  openTab(activeTab);
-};
-
-function closeAddTab(){ addTab.classList.add("hidden"); }
-function closeAddEntry(){ addEntry.classList.add("hidden"); }
-function closeSettings(){ settings.classList.add("hidden"); }
-
-backBtn.onclick = renderHome;
-document.getElementById("settingsBtn").onclick = () => settings.classList.remove("hidden");
-
-function finishOnboarding() {
-  data.firstRun = false;
-  save();
-  onboarding.classList.add("hidden");
+  document.getElementById("weekly").innerHTML =
+    `<b>Total:</b> ${total}<br><b>Avg/day:</b> ${(total/7).toFixed(2)}`;
 }
 
-applyTheme();
-if (data.firstRun) onboarding.classList.remove("hidden");
-renderHome();
+function openSettings(){
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("settings").classList.remove("hidden");
+}
+
+function closeSettings(){
+  document.getElementById("settings").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+}
+
+function toggleTheme(){
+  document.body.dataset.theme =
+    document.body.dataset.theme === "dark" ? "light" : "dark";
+}
+
+function enableNotif(){
+  Notification.requestPermission();
+}
+
+renderTabs();

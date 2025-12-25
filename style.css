@@ -1,68 +1,55 @@
 * {
   box-sizing: border-box;
+  font-family: system-ui, sans-serif;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: #f4f4f4;
 }
 
-:root {
-  --bg: #fff;
-  --text: #000;
-  --card: #f2f2f2;
+.dark body {
+  background: #121212;
+  color: white;
 }
 
-body.dark {
-  --bg: #111;
-  --text: #fff;
-  --card: #1e1e1e;
+#app {
+  max-width: 500px;
+  margin: auto;
+  padding: 10px;
 }
 
 header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: env(safe-area-inset-top) 12px 12px;
+  align-items: center;
 }
 
-main {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-button, select, input {
-  font-size: 18px;
-  padding: 12px;
-  width: 100%;
+button {
+  padding: 10px;
   margin-top: 10px;
 }
 
-.tab, .day {
-  background: var(--card);
-  margin: 12px;
-  padding: 12px;
-  border-radius: 12px;
+.primary {
+  width: 100%;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 8px;
 }
 
-.entry {
-  font-size: 14px;
-  margin-left: 8px;
+.back {
+  background: none;
+  border: none;
+  font-size: 16px;
 }
 
 .hidden {
   display: none;
 }
 
-/* FULLSCREEN MODAL */
-.fullscreen {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  padding: 20px;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
 }

@@ -2,75 +2,58 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EasyTrack</title>
-  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <button id="backBtn" class="hidden">←</button>
-  <h1 id="appTitle">EasyTrack</h1>
-  <button id="settingsBtn">⚙️</button>
-</header>
+<div id="app">
 
-<main id="app"></main>
+  <!-- HEADER -->
+  <header>
+    <h1 id="appTitle">EasyTrack</h1>
+    <button onclick="openSettings()">⚙️</button>
+  </header>
 
-<!-- ONBOARDING -->
-<div id="onboarding" class="fullscreen hidden">
-  <h2>EasyTrack</h2>
-  <p>Takip et, motive ol, devam et 💪</p>
-  <p>Yeni tab aç → değer gir → gelişimini gör</p>
-  <button onclick="finishOnboarding()">Başla</button>
-</div>
+  <!-- HOME -->
+  <section id="home">
+    <button class="primary" onclick="openNewTab()">➕ Yeni Tab</button>
+    <div id="tabs"></div>
+  </section>
 
-<!-- SETTINGS -->
-<div id="settings" class="fullscreen hidden">
-  <h2>Ayarlar</h2>
+  <!-- TAB DETAIL -->
+  <section id="tabDetail" class="hidden">
+    <button class="back" onclick="goHome()">← Geri</button>
+    <h2 id="tabName"></h2>
 
-  <label>Tema</label>
-  <select id="themeSelect">
-    <option value="light">Açık</option>
-    <option value="dark">Karanlık</option>
-  </select>
+    <select id="unit">
+      <option value="sayfa">Sayfa</option>
+      <option value="dakika">Dakika</option>
+      <option value="saat">Saat</option>
+      <option value="adım">Adım</option>
+      <option value="litre">Litre</option>
+    </select>
 
-  <label>Dil</label>
-  <select id="langSelect">
-    <option value="tr">Türkçe</option>
-    <option value="nl">Nederlands</option>
-    <option value="en">English</option>
-  </select>
+    <input type="number" id="valueInput" placeholder="Değer gir" min="0">
 
-  <button onclick="closeSettings()">Kapat</button>
-</div>
+    <button class="primary" onclick="addEntry()">Ekle</button>
 
-<!-- ADD TAB -->
-<div id="addTab" class="fullscreen hidden">
-  <h2>Yeni Tab</h2>
+    <div id="entries"></div>
+    <div id="totals"></div>
+  </section>
 
-  <input id="tabName" placeholder="Tab adı">
+  <!-- SETTINGS -->
+  <section id="settings" class="hidden">
+    <button class="back" onclick="closeSettings()">← Geri</button>
+    <h2>Ayarlar</h2>
 
-  <label>Birim</label>
-  <select id="unitSelect">
-    <option>Sayfa</option>
-    <option>Dakika</option>
-    <option>Saat</option>
-    <option>Adım</option>
-    <option>Litre</option>
-    <option>Adet</option>
-  </select>
+    <label>
+      Karanlık Mod
+      <input type="checkbox" onchange="toggleDarkMode(this)">
+    </label>
+  </section>
 
-  <button id="createTab">Oluştur</button>
-  <button onclick="closeAddTab()">İptal</button>
-</div>
-
-<!-- ADD ENTRY -->
-<div id="addEntry" class="fullscreen hidden">
-  <h2>Değer Gir</h2>
-  <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
-  <button id="saveEntry">Kaydet</button>
-  <button onclick="closeAddEntry()">İptal</button>
 </div>
 
 <script src="script.js"></script>

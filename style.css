@@ -1,5 +1,5 @@
 :root {
-  --bg: #fff;
+  --bg: #ffffff;
   --text: #000;
   --card: #f2f2f2;
 }
@@ -19,11 +19,20 @@ body {
 
 header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 15px;
+  padding: 10px;
 }
 
-.day, .tab {
+button {
+  font-size: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+.tab, .day {
   background: var(--card);
   margin: 10px;
   padding: 10px;
@@ -33,4 +42,11 @@ header {
 .entry {
   font-size: 14px;
   margin-left: 10px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  padding: 20px;
 }

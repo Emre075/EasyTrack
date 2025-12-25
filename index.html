@@ -9,11 +9,36 @@
 </head>
 <body>
   <header>
-    <h1>EasyTrack</h1>
-    <button id="addTab">➕</button>
+    <button id="backBtn" class="hidden">←</button>
+    <h1 id="title">EasyTrack</h1>
+    <button id="settingsBtn">⚙️</button>
   </header>
 
   <main id="app"></main>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settings" class="modal hidden">
+    <h2>Ayarlar</h2>
+
+    <label>
+      Tema:
+      <select id="themeSelect">
+        <option value="light">Açık</option>
+        <option value="dark">Karanlık</option>
+      </select>
+    </label>
+
+    <label>
+      Dil:
+      <select id="langSelect">
+        <option value="tr">Türkçe</option>
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+
+    <button onclick="closeSettings()">Kapat</button>
+  </div>
 
   <script src="script.js"></script>
 </body>

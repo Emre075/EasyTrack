@@ -101,9 +101,11 @@ function openTab(i) {
   const today = todayIndex();
 
   let weeklyTotal = 0;
-  let daysWithData = 0;
+  let countedDays = today + 1; // BUGÜNE KADAR OLAN GÜNLER
 
   tab.days.forEach((day, dIndex) => {
+    if (dIndex > today) return;
+
     const div = document.createElement("div");
     div.className = "day";
     if (dIndex === today) div.classList.add("today");
@@ -112,42 +114,44 @@ function openTab(i) {
     header.className = "day-header";
     header.innerHTML = `<strong>${day.name}</strong>`;
 
-    if (dIndex <= today) {
-      const btn = document.createElement("button");
-      btn.textContent = "➕";
-      btn.onclick = () => {
-        activeDay = dIndex;
-        addEntryModal.classList.remove("hidden");
-        entryValueInput.value = "";
-      };
-      header.appendChild(btn);
-    }
+    const btn = document.createElement("button");
+    btn.textContent = "➕";
+    btn.onclick = () => {
+      activeDay = dIndex;
+      addEntryModal.classList.remove("hidden");
+      entryValueInput.value = "";
+    };
+    header.appendChild(btn);
 
     div.appendChild(header);
 
     let dailyTotal = 0;
+
+    if (day.entries.length === 0) {
+      div.innerHTML += `<div class="entry">0 ${tab.unit}</div>`;
+    }
+
     day.entries.forEach(e => {
       dailyTotal += e.value;
-      weeklyTotal += e.value;
       const p = document.createElement("div");
       p.className = "entry";
       p.textContent = `${e.value} ${tab.unit} · ${e.time}`;
       div.appendChild(p);
     });
 
-    if (day.entries.length) {
-      daysWithData++;
-      div.innerHTML += `<b>Toplam:</b> ${dailyTotal} ${tab.unit}`;
-    }
+    weeklyTotal += dailyTotal;
 
+    div.innerHTML += `<b>Toplam:</b> ${dailyTotal} ${tab.unit}`;
     app.appendChild(div);
   });
+
+  const avg = countedDays > 0 ? (weeklyTotal / countedDays).toFixed(1) : 0;
 
   const stats = document.createElement("div");
   stats.className = "tab";
   stats.innerHTML = `
     📊 Haftalık Toplam: <b>${weeklyTotal}</b> ${tab.unit}<br>
-    📈 Günlük Ortalama: <b>${daysWithData ? (weeklyTotal/daysWithData).toFixed(1) : 0}</b> ${tab.unit}
+    📈 Günlük Ortalama: <b>${avg}</b> ${tab.unit}
   `;
   app.appendChild(stats);
 }
@@ -164,9 +168,17 @@ function closeAddEntry() {
 
 document.getElementById("saveEntry").onclick = () => {
   const value = Number(entryValueInput.value);
-  if (!Number.isFinite(value) || value <= 0) return alert("Sadece sayı gir");
 
-  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // ✅ 0 SERBEST, NEGATİF YOK
+  if (!Number.isFinite(value) || value < 0) {
+    return alert("0 veya pozitif sayı gir");
+  }
+
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
   data.tabs[activeTab].days[activeDay].entries.push({ value, time });
 
   save();

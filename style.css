@@ -21,26 +21,44 @@ body {
 header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px;
 }
 
 .hidden { display: none; }
 
-.tab, .day, .chart {
+button {
+  padding: 8px 12px;
+  font-size: 16px;
+}
+
+.tab, .day {
   background: var(--card);
   margin: 10px;
   padding: 10px;
   border-radius: 12px;
 }
 
-.bar {
-  height: 20px;
-  background: var(--accent);
-  margin: 4px 0;
+.day.today {
+  border: 2px solid var(--accent);
 }
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.entry {
+  font-size: 14px;
+  margin-left: 10px;
+}
+
 .modal {
   position: fixed;
   inset: 0;
   background: var(--bg);
   padding: 20px;
+  z-index: 10;
 }

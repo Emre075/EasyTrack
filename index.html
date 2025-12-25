@@ -1,84 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>EasyTrack</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
 <header>
-  <div class="logo">EasyTrack</div>
-  <button class="ghost" onclick="openSettings()">⚙️</button>
+  <button id="backBtn" class="hidden">←</button>
+  <h1 id="appTitle">EasyTrack</h1>
+  <button id="settingsBtn">⚙️</button>
 </header>
 
-<main class="container" id="home">
-  <div class="card">
-    <h3>Tabs</h3>
-    <div id="tabList" class="tabs"></div>
+<main id="app"></main>
 
-    <div class="row">
-      <input id="newTabName" placeholder="New tab name (Qur'an, Sport...)" />
-      <button onclick="addTab()">Add</button>
-    </div>
-  </div>
-</main>
+<!-- ONBOARDING -->
+<div id="onboarding" class="fullscreen hidden">
+  <h2>EasyTrack</h2>
+  <p>Takip et, motive ol, devam et 💪</p>
+  <p>Yeni tab aç → değer gir → gelişimini gör</p>
+  <button onclick="finishOnboarding()">Başla</button>
+</div>
 
-<main class="container hidden" id="tabView">
-  <div class="back" onclick="goHome()">← Back</div>
-  <h2 id="tabTitle"></h2>
+<!-- SETTINGS -->
+<div id="settings" class="fullscreen hidden">
+  <h2>Ayarlar</h2>
 
-  <div class="card">
-    <div class="row">
-      <select id="unit">
-        <option value="page">Pages</option>
-        <option value="minute">Minutes</option>
-        <option value="hour">Hours</option>
-        <option value="step">Steps</option>
-        <option value="liter">Liters</option>
-      </select>
-      <input id="value" type="number" placeholder="Value" />
-      <button onclick="addEntry()">Save</button>
-    </div>
-    <small>Only today or past allowed</small>
-  </div>
+  <label>Tema</label>
+  <select id="themeSelect">
+    <option value="light">Açık</option>
+    <option value="dark">Karanlık</option>
+  </select>
 
-  <div class="card">
-    <canvas id="chart"></canvas>
-  </div>
+  <label>Dil</label>
+  <select id="langSelect">
+    <option value="tr">Türkçe</option>
+    <option value="nl">Nederlands</option>
+    <option value="en">English</option>
+  </select>
 
-  <div class="card">
-    <h3>Entries</h3>
-    <div id="entries" class="list"></div>
-  </div>
+  <button onclick="closeSettings()">Kapat</button>
+</div>
 
-  <div class="card">
-    <h3>Weekly</h3>
-    <div id="weekly"></div>
-  </div>
-</main>
+<!-- ADD TAB -->
+<div id="addTab" class="fullscreen hidden">
+  <h2>Yeni Tab</h2>
 
-<main class="container hidden" id="settings">
-  <div class="back" onclick="closeSettings()">← Back</div>
-  <div class="card">
-    <h3>Settings</h3>
-    <button onclick="toggleTheme()">Dark / Light</button>
-    <button onclick="enableNotif()">Enable notifications</button>
-  </div>
-</main>
+  <input id="tabName" placeholder="Tab adı">
 
-<footer>
-  EasyTrack • Offline • LocalStorage
-</footer>
+  <label>Birim</label>
+  <select id="unitSelect">
+    <option>Sayfa</option>
+    <option>Dakika</option>
+    <option>Saat</option>
+    <option>Adım</option>
+    <option>Litre</option>
+    <option>Adet</option>
+  </select>
 
-<script src="app.js"></script>
+  <button id="createTab">Oluştur</button>
+  <button onclick="closeAddTab()">İptal</button>
+</div>
+
+<!-- ADD ENTRY -->
+<div id="addEntry" class="fullscreen hidden">
+  <h2>Değer Gir</h2>
+  <input id="entryValue" type="number" inputmode="numeric" placeholder="Sadece sayı">
+  <button id="saveEntry">Kaydet</button>
+  <button onclick="closeAddEntry()">İptal</button>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
